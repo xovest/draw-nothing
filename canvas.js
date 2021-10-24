@@ -1,37 +1,85 @@
-window.addEventListener('load', () => {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas');
+const increaseBtn = document.getElementById('increase');
+const decreaseBtn = document.getElementById('decrease');
+const sizeEL = document.getElementById('size');
+const colorEl = document.getElementById('color');
+const clearEl = document.getElementById('clear');
 
-  //resizing
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
+const ctx = canvas.getContext('2d');
 
-  //vars
-  let painting = false;
+let size = 10
+let isPressed = false
+let color = 'black'
+let x
+let y
 
-  function startPos(e) {
-    painting = true;
-    draw(e);
-  }
+canvas.addEventListener('mousedown', (e) => {
+    isPressed = true
 
-  function finishPos() {
-    painting = false;
+    x = e.offsetX
+    y = e.offsetY
+})
+
+canvas.addEventListener('mouseup', (e) => {
+    isPressed = false
+
+    x = undefined
+    y = undefined
+})
+
+canvas.addEventListener('mousemove', (e) => {
+    if(isPressed) {
+        const x2 = e.offsetX
+        const y2 = e.offsetY
+
+        drawCircle(x2, y2)
+        drawLine(x, y, x2, y2)
+
+        x = x2
+        y = y2
+    }
+})
+
+function drawCircle(x, y) {
     ctx.beginPath();
-  }
+    ctx.arc(x, y, size, 0, Math.PI * 2)
+    ctx.fillStyle = color
+    ctx.fill()
+}
 
-  function draw(e) {
-    if (!painting) return;
-    ctx.lineWidth = 10;
-    ctx.lineCap = 'round';
+function drawLine(x1, y1, x2, y2) {
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.strokeStyle = color
+    ctx.lineWidth = size * 2
+    ctx.stroke()
+}
 
-    ctx.lineTo(e.clientX, e.clintY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX, e.clintY);
-  }
+function updateSizeOnScreen() {
+    sizeEL.innerText = size
+}
 
-  //event listeners
-  canvas.addEventListener('mousedown', startPos);
-  canvas.addEventListener('mouseup', finishPos);
-  canvas.addEventListener('mousemove', draw);
-});
+increaseBtn.addEventListener('click', () => {
+    size += 5
+
+    if(size > 50) {
+        size = 50
+    }
+
+    updateSizeOnScreen()
+})
+
+decreaseBtn.addEventListener('click', () => {
+    size -= 5
+
+    if(size < 5) {
+        size = 5
+    }
+
+    updateSizeOnScreen()
+})
+
+colorEl.addEventListener('change', (e) => color = e.target.value)
+
+clearEl.addEventListener('click', () => ctx.clearRect(0,0, canvas.width, canvas.height))
